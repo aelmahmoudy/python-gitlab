@@ -23,7 +23,7 @@ instance_name() {
   grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" ~/.python-gitlab.cfg | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
 }
 
-remote=$(git config --local gitlab.remote)
+remote=$(git config gitlab.remote)
 [ -n "$remote" ] || remote=$(git remote)
 if [ "x$1" = "x--remote" ]; then
   remote=$2
@@ -34,7 +34,11 @@ if [ -z "$remote" ]; then
   exit 1
 fi
 if [ $(echo $remote | wc -w) -gt 1 ]; then
-  echo "Multiple remotes found, specify a remote using --remote REMOTE"
+  echo <<EOF
+Multiple remotes found, specify a remote using '--remote REMOTE' argument
+Alternatively, you can configure your git repository using the command:
+git config --local gitlab.remote REMOTE"
+EOF
   exit 1
 fi
 
