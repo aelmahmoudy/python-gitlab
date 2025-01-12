@@ -2,7 +2,7 @@
 
 # TODO:
 #   check args for cfg file
-if [ "x$1" = "x--git-remote" ]; then
+if [ "x$1" = "x--remote" ]; then
   git_repo="$1 $2"
   shift 2
 fi

@@ -23,17 +23,18 @@ instance_name() {
   grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" ~/.python-gitlab.cfg | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
 }
 
-if [ "x$1" = "x--git-remote" ]; then
+remote=$(git config --local gitlab.remote)
+[ -n "$remote" ] || remote=$(git remote)
+if [ "x$1" = "x--remote" ]; then
   remote=$2
   shift 2
 fi
-[ -n "$remote" ] || remote=$(git remote)
 if [ -z "$remote" ]; then
   echo "No remotes found in repository"
   exit 1
 fi
 if [ $(echo $remote | wc -w) -gt 1 ]; then
-  echo "Multiple remotes found, specify a remote using --git-remote REMOTE"
+  echo "Multiple remotes found, specify a remote using --remote REMOTE"
   exit 1
 fi
 
