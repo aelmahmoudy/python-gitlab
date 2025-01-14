@@ -34,7 +34,7 @@ if [ -z "$remote" ]; then
   exit 1
 fi
 if [ $(echo $remote | wc -w) -gt 1 ]; then
-  echo <<EOF
+  cat <<EOF
 Multiple remotes found, specify a remote using '--remote REMOTE' argument
 Alternatively, you can configure your git repository using the command:
 git config --local gitlab.remote REMOTE"
