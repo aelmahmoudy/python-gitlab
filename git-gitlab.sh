@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PYGLAB_CONF=~/.python-gitlab.cfg
+
 select_remote () {
   remotes=$(git remote)
   if [ $(echo $remotes | wc -w) -gt 1 ]; then
@@ -20,7 +22,7 @@ select_remote () {
 
 instance_name() {
   host=$1
-  grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" ~/.python-gitlab.cfg | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
+  grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" $PYGLAB_CONF | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
 }
 
 remote=$(git config gitlab.remote)
@@ -46,7 +48,7 @@ url=$(git remote get-url $remote)
 host=$(echo $url | sed -e 's#^\(git\@\|[a-z]\+://\)\([^:/]\+\)[:/].*#\2#')
 instance=$(instance_name $host)
 if [ -z "$instance" ]; then
-  echo "No instance found for $host in ~/python-gitlab.cfg"
+  echo "No instance found for $host in $PYGLAB_CONF"
   exit 1
 fi
 
