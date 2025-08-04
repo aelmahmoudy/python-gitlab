@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PYGLAB_CONF=~/.python-gitlab.cfg
+DFLT_PYGLAB_CONF=~/.python-gitlab.cfg
 
 select_remote () {
   remotes=$(git remote)
@@ -22,7 +22,8 @@ select_remote () {
 
 instance_name() {
   host=$1
-  grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" $PYGLAB_CONF | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
+  pyglab_conf=$2
+  grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" $pyglab_conf | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
 }
 
 remote=$(git config gitlab.remote)
@@ -31,6 +32,26 @@ if [ "x$1" = "x--remote" ]; then
   remote=$2
   shift 2
 fi
+
+pyglab_conf=$DFLT_PYGLAB_CONF
+pre_cmd_args=""
+while echo $1 | grep -q "^-" ; do
+  case $1 in
+    -g|--gitlab|-o|--output|-f|--fields)
+      pre_cmd_args="$pre_cmd_args $1 $2"
+      shift 2
+      ;;
+    -c|--config-file)
+      pyglab_conf=$2
+      pre_cmd_args="$pre_cmd_args $1 $2"
+      shift 2
+      ;;
+    *)
+      pre_cmd_args="$pre_cmd_args $1"
+      shift 1
+      ;;
+  esac
+done
 if [ -z "$remote" ]; then
   echo "No remotes found in repository"
   exit 1
@@ -46,9 +67,9 @@ fi
 
 url=$(git remote get-url $remote)
 host=$(echo $url | sed -e 's#^\(git\@\|[a-z]\+://\)\([^:/]\+\)[:/].*#\2#')
-instance=$(instance_name $host)
+instance=$(instance_name $host $pyglab_conf)
 if [ -z "$instance" ]; then
-  echo "No instance found for $host in $PYGLAB_CONF"
+  echo "No instance found for $host in $pyglab_conf"
   exit 1
 fi
 
@@ -56,4 +77,4 @@ proj=$(echo $url | sed -e 's#.*:\(.*\)$#\1#')
 proj=$(echo $proj | sed -e 's#\.git$##')
 projid=$proj
 
-gitlab -g $instance $* --project-id $projid
+gitlab -g $instance $pre_cmd_args $* --project-id $projid
