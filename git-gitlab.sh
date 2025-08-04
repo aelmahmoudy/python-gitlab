@@ -23,7 +23,19 @@ select_remote () {
 instance_name() {
   host=$1
   pyglab_conf=$2
-  grep -B 5 "^\s*url\s*=\s*http\(s\)*://$host" $pyglab_conf | grep "^\[" | tail -n 1 | sed -e 's#\[\(.\+\)\]#\1#'
+	python3 -c "import re
+import sys
+from configparser import ConfigParser
+
+confparser = ConfigParser(allow_no_value=True)
+confparser.read(sys.argv[1])
+proto=re.compile(r'http(s)*://')
+for section in confparser.sections():
+  url=confparser.get(section,'url',fallback=None)
+  if url: url=proto.sub('',url)
+  if url==sys.argv[2]:
+    print(section)
+    break" $pyglab_conf $host
 }
 
 remote=$(git config gitlab.remote)
